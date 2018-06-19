@@ -293,7 +293,10 @@ function calcWin(color, row, column) {
             }
         }
         if (blankSpaces === 0) {
-            resetGame();
+            alert("The match is a tie!");
+            setTimeout(function () {
+                resetGame();
+            }, 5000);
         }
     }
 }
@@ -312,7 +315,10 @@ function alertRedWin() {
         database.ref().update({
             yellowMessage: "Yellow has lost!"
         });
-        resetGame();
+        clearInterval(intervalId);
+        setTimeout(function () {
+            resetGame();
+        }, 5000);
     }
     redCount = 1;
 }
@@ -322,6 +328,7 @@ function alertYellowWin() {
         $("#yellowAlert").text("");
         $("#yellowAlert").text("Yellow has won!");
         yellowWins++;
+        clearInterval(intervalId);
         database.ref().update({
             playerCount: 0,
         })
@@ -331,7 +338,9 @@ function alertYellowWin() {
         database.ref().update({
             yellowMessage: "Yellow has won!"
         });
-        resetGame();
+        setTimeout(function () {
+            resetGame();
+        }, 5000);
     }
     yellowCount = 1;
 }
@@ -404,6 +413,7 @@ function decrement() {
         clearInterval(intervalId);
         if (redMoves === yellowMoves) {
             yellowWins++;
+            clearInterval(intervalId);
             database.ref("/players").update({
                 playerCount: 0,
             })
@@ -417,6 +427,7 @@ function decrement() {
             });
         } else {
             redWins++;
+            clearInterval(intervalId);
             database.ref("/players").update({
                 playerCount: 0,
             })
@@ -464,8 +475,8 @@ $(".circle").on("click", function () {
                 if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
                     console.log("red move successful");
                     clearInterval(intervalId);
-                    intervalId = setInterval(decrement, 1000);
                     timeRemaining = 30;
+                    intervalId = setInterval(decrement, 1000);
                     gameArray[thisRow][thisColumn] = "red";
                     console.log(gameArray);
                     $(this).addClass("red");
@@ -480,10 +491,8 @@ $(".circle").on("click", function () {
                 } else if (gameArray[rowBelow][thisColumn] !== "blank" && gameArray[thisRow][thisColumn] === "blank") {
                     console.log("red move successful");
                     clearInterval(intervalId);
-                    intervalId = setInterval(decrement, 1000);
                     timeRemaining = 30;
-                    // $("#redTimeDisplay").addClass("hide");
-                    // $("#yellowTimeDisplay").removeClass("hide");
+                    intervalId = setInterval(decrement, 1000);
                     gameArray[thisRow][thisColumn] = "red";
                     console.log(gameArray);
                     $(this).addClass("red");
@@ -508,8 +517,8 @@ $(".circle").on("click", function () {
             if (redMoves === yellowMoves + 1) {
                 if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
                     clearInterval(intervalId);
-                    intervalId = setInterval(decrement, 1000);
                     timeRemaining = 30;
+                    intervalId = setInterval(decrement, 1000);
                     gameArray[thisRow][thisColumn] = "yellow";
                     $(this).addClass("yellow");
                     calcWin(userColor, thisRow, thisColumn);
@@ -522,8 +531,8 @@ $(".circle").on("click", function () {
                     })
                 } else if (gameArray[rowBelow][thisColumn] !== "blank" && gameArray[thisRow][thisColumn] === "blank") {
                     clearInterval(intervalId);
-                    intervalId = setInterval(decrement, 1000);
                     timeRemaining = 30;
+                    intervalId = setInterval(decrement, 1000);
                     gameArray[thisRow][thisColumn] = "yellow";
                     $(this).addClass("yellow");
                     calcWin(userColor, thisRow, thisColumn);
@@ -591,11 +600,16 @@ database.ref().on("value", function (snapshot) {
 });
 
 database.ref("/wins").on("value", function (snapshot) {
+    clearInterval(intervalId);
     redWins = snapshot.val().redWins;
     yellowWins = snapshot.val().yellowWins;
     $("#redWins").text("Red Wins: " + snapshot.val().redWins);
     $("#yellowWins").text("Yellow Wins: " + snapshot.val().yellowWins);
-    resetGame();
+    if (userColor === "red" || userColor === "yellow") {
+    setTimeout(function () {
+        resetGame();
+    }, 5000);
+}
 })
 
 database.ref("/array").on("value", function (snapshot) {
@@ -632,3 +646,28 @@ if (playerCount > 1) {
 } else {
     $(".playButton").removeClass("hide");
 }
+
+$("#chatButton").on("click", function() {
+    var message = $("#chatInput").val();
+    if (userColor === "red") {
+    database.ref("/chat").push({
+        message: "Red Player: " + message
+    });
+} else if (userColor === "yellow") {
+    database.ref("/chat").push({
+        message: "Yellow Player: " + message
+    });
+} else {
+    database.ref("/chat").push({
+        message: "Spectator: " + message
+    });
+}
+    $("#chatInput").val("");
+});
+
+database.ref("/chat").on("child_added", function(childSnapshot) {
+    var message = childSnapshot.val().message
+    $("#messages").append("<p>" + message + "</p>");
+    var elem = document.getElementById('messages');
+    elem.scrollTop = elem.scrollHeight;
+});

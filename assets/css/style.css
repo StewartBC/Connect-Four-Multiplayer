@@ -21,6 +21,17 @@
 .yellow {
     background-color: yellow;
 }
+#chatbox {
+    position: absolute;
+}
+
+input {
+    width: 
+}
+
+#chatColumn {
+    background-color: lightgray;
+}
 
 /* #redAlert, #yellowAlert {
     margin-top: 150px;
