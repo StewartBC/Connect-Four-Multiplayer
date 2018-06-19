@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multiplayer Connect Four</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
+  <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+</head>
+
+<body>
+  <div class="container" id="game">
+    <div id="gameBoard" class="container">
+      <div class="columns is-gapless">
+        <div id="redStats" class="column is-one-fifth">
+          <div class="columns is-gapless">
+            <div class="column is-one-fourth"></div>
+            <div class="column is-one-half">
+              <a id="red" class="button playButton" data-color="red">Play as Red</a>
+              <a class="button" id="reset">Reset</a>
+              <div class="columns">
+                <div class="column" id="redAlert">
+                </div>
+              </div>
+              <div class="columns">
+                <div class="column" id="redWins">
+                </div>
+              </div>
+              <div class="columns">
+                <div class="column" id="redTimeDisplay">
+                </div>
+              </div>
+            </div>
+            <div class="column is-one-fourth"></div>
+          </div>
+        </div>
+        <div id="column1" class="column">
+          <section id="50" class="circle" data-column="0" data-row=5></section>
+          <section id="40" class="circle" data-column="0" data-row=4></section>
+          <section id="30" class="circle" data-column="0" data-row=3></section>
+          <section id="20" class="circle" data-column="0" data-row=2></section>
+          <section id="10" class="circle" data-column="0" data-row=1></section>
+          <section id="00" class="circle" data-column="0" data-row=0></section>
+        </div>
+        <div id="column2" class="column">
+          <section id="51" class="circle" data-column="1" data-row="5"></section>
+          <section id="41" class="circle" data-column="1" data-row="4"></section>
+          <section id="31" class="circle" data-column="1" data-row="3"></section>
+          <section id="21" class="circle" data-column="1" data-row="2"></section>
+          <section id="11" class="circle" data-column="1" data-row="1"></section>
+          <section id="01" class="circle" data-column="1" data-row="0"></section>
+        </div>
+        <div id="column3" class="column">
+          <section id="52" class="circle" data-column="2" data-row="5"></section>
+          <section id="42" class="circle" data-column="2" data-row="4"></section>
+          <section id="32" class="circle" data-column="2" data-row="3"></section>
+          <section id="22" class="circle" data-column="2" data-row="2"></section>
+          <section id="12" class="circle" data-column="2" data-row="1"></section>
+          <section id="02" class="circle" data-column="2" data-row="0"></section>
+        </div>
+        <div id="column4" class="column">
+          <section id="53" class="circle" data-column="3" data-row="5"></section>
+          <section id="43" class="circle" data-column="3" data-row="4"></section>
+          <section id="33" class="circle" data-column="3" data-row="3"></section>
+          <section id="23" class="circle" data-column="3" data-row="2"></section>
+          <section id="13" class="circle" data-column="3" data-row="1"></section>
+          <section id="03" class="circle" data-column="3" data-row="0"></section>
+        </div>
+        <div id="column5" class="column">
+          <section id="54" class="circle" data-column="4" data-row="5"></section>
+          <section id="44" class="circle" data-column="4" data-row="4"></section>
+          <section id="34" class="circle" data-column="4" data-row="3"></section>
+          <section id="24" class="circle" data-column="4" data-row="2"></section>
+          <section id="14" class="circle" data-column="4" data-row="1"></section>
+          <section id="04" class="circle" data-column="4" data-row="0"></section>
+        </div>
+        <div id="column6" class="column">
+          <section id="55" class="circle" data-column="5" data-row="5"></section>
+          <section id="45" class="circle" data-column="5" data-row="4"></section>
+          <section id="35" class="circle" data-column="5" data-row="3"></section>
+          <section id="25" class="circle" data-column="5" data-row="2"></section>
+          <section id="15" class="circle" data-column="5" data-row="1"></section>
+          <section id="05" class="circle" data-column="5" data-row="0"></section>
+        </div>
+        <div id="column7" class="column">
+          <section id="56" class="circle" data-column="6" data-row="5"></section>
+          <section id="46" class="circle" data-column="6" data-row="4"></section>
+          <section id="36" class="circle" data-column="6" data-row="3"></section>
+          <section id="26" class="circle" data-column="6" data-row="2"></section>
+          <section id="16" class="circle" data-column="6" data-row="1"></section>
+          <section id="06" class="circle" data-column="6" data-row="0"></section>
+        </div>
+        <div id="yellowStats" class="column is-one-fifth">
+          <div class="columns is-gapless">
+            <div class="column is-one-fourth"></div>
+            <div class="column is-one-half">
+              <a id="yellow" class="button playButton" data-color="yellow">Play as Yellow</a>
+              <div class="columns is-gapless">
+                <div class="column" id="yellowStats">
+                </div>
+              </div>
+              <div class="columns">
+                <div class="column" id="yellowAlert">
+                </div>
+              </div>
+              <div class="columns">
+                <div class="column" id="yellowWins">
+                </div>
+              </div>
+              <div class="columns">
+                <div class="column" id="yellowTimeDisplay">
+                </div>
+              </div>
+            </div>
+            <div class="column is-one-fourth"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="assets/javascript/app.js"></script>
+</body>
+
+</html>

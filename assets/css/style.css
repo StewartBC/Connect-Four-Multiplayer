@@ -1,0 +1,27 @@
+.circle {
+    background-color: white;
+    border-radius: 50%;
+    width: 75px;
+    height: 75px;
+    margin: 10px 0px 10px 10px;
+}
+
+.hide {
+    visibility: hidden;
+}
+
+.columns {
+    background-color: #6691FF;
+}
+
+.red {
+    background-color: red;
+}
+
+.yellow {
+    background-color: yellow;
+}
+
+/* #redAlert, #yellowAlert {
+    margin-top: 150px;
+} */
