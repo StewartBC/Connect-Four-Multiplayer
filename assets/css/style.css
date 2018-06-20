@@ -6,6 +6,10 @@
     margin: 10px 0px 10px 10px;
 }
 
+body {
+    background-color: #D2E4EF;
+}
+
 .hide {
     visibility: hidden;
 }
@@ -58,7 +62,7 @@
 }
 
 #redTimeDisplay, #yellowTimeDisplay {
-    margin-top: 140px;
+    margin-top: 110px;
 }
 
 #redAlert, #yellowAlert {
@@ -67,6 +71,10 @@
 
 .input {
     margin-bottom: 5px;
+    background-color: #EFEFEF;
+    border: 0px solid #64B8EF;
+    border-radius: 15px;
+
 }
 
 #chatButton {

@@ -508,6 +508,7 @@ $(".circle").on("click", function () {
     if (userColor !== "red" && userColor !== "yellow") {
         if (playerCount > 1) {
             alert("You must wait for this game to finish before playing!");
+            colorize();
         } else {
             alert("You must choose a color before playing!");
         }
@@ -525,7 +526,12 @@ $(".circle").on("click", function () {
         if (playerCount > 1) {
             if (userColor === "red") {
                 if (redMoves === yellowMoves) {
-                    if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
+                    if (gameArray[thisRow][thisColumn] === "red" || gameArray[thisRow][thisColumn] === "yellow") {
+                        console.log("u cant");
+                        database.ref("/redText").update({
+                            redText: "You can't move there!"
+                        })
+                    } else if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
                         totalMoves = redMoves + yellowMoves;
                         resetInterval();
                         gameArray[thisRow][thisColumn] = "red";
@@ -552,15 +558,23 @@ $(".circle").on("click", function () {
                             gameArray: gameArray
                         })
                     } else {
-                        datebase.ref("/redText").update({
+                        database.ref("/redText").update({
                             redText: "You can't move there!"
                         })
                     }
+                } else {
+                    database.ref("/redText").update({
+                        redText: "It's not your turn!!"
+                    })
                 }
             }
             if (userColor === "yellow") {
                 if (redMoves === yellowMoves + 1) {
-                    if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
+                    if (gameArray[thisRow][thisColumn] === "red" || gameArray[thisRow][thisColumn] === "yellow") {
+                        database.ref("/yellowText").update({
+                            yellowText: "You can't move there!"
+                        })
+                    } else if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
                         totalMoves = redMoves + yellowMoves;
                         resetInterval();
                         gameArray[thisRow][thisColumn] = "yellow";
@@ -591,6 +605,10 @@ $(".circle").on("click", function () {
                             yellowText: "You can't move there!"
                         })
                     }
+                } else {
+                    database.ref("/yellowText").update({
+                        yellowText: "It's not your turn!!"
+                    })
                 }
             }
         } else {
@@ -664,26 +682,29 @@ database.ref("/yellowPlayer").on("value", function (snapshot) {
 
 database.ref("/redText").on("value", function (snapshot) {
     redMessage = snapshot.val().redText;
-    $("#redAlert").html(redMessage)
+    $("#redAlert").html("<h6>" + redMessage + "</h6>")
 });
 
 database.ref("/yellowText").on("value", function (snapshot) {
     yellowMessage = snapshot.val().yellowText;
-    $("#yellowAlert").html(yellowMessage)
+    $("#yellowAlert").html("<h6>" + yellowMessage + "</h6>")
 });
 
+
 database.ref("/wins").on("value", function (snapshot) {
-        if (userColor === "") {
-            for (h = 0; h < gameArray.length; h++) {
-                for (l = 0; l < gameArray[h].length; l++) {
-                    gameArray[h][l] = "blank";
-                    $(".circle").removeClass("red");
-                    $(".circle").removeClass("yellow");
-                }
+    $("#redTimeDisplay").addClass("hide");
+    $("#yellowTimeDisplay").addClass("hide");
+    if (userColor === "") {
+        for (h = 0; h < gameArray.length; h++) {
+            for (l = 0; l < gameArray[h].length; l++) {
+                gameArray[h][l] = "blank";
+                $(".circle").removeClass("red");
+                $(".circle").removeClass("yellow");
             }
-            clearInterval(intervalId);
-            timeRemaining = 30;
         }
+        clearInterval(intervalId);
+        timeRemaining = 30;
+    }
 
     redWins = snapshot.val().redWins;
     yellowWins = snapshot.val().yellowWins;
@@ -707,6 +728,7 @@ database.ref("/wins").on("value", function (snapshot) {
 })
 
 database.ref("/array").on("value", function (snapshot) {
+    resetCheck();
     gameArray = snapshot.val().gameArray;
     colorize();
 })
@@ -720,11 +742,16 @@ database.ref("/chat").on("child_added", function (childSnapshot) {
 
 
 // resets the game after 31 seconds if a spectator joins during a game in which both players left
-setTimeout(function() {
-    if (playerCount > 1 && redMovesOnLoad === redMoves && yellowMovesOnLoad === yellowMoves) {
-        resetGame();
-    }
-}, 31000)
+function resetCheck() {
+    var startMoves = redMoves + yellowMoves;
+    var startWins = redWins + yellowWins;
+    var startPlayerCount = playerCount;
+    setTimeout(function () {
+        if (startMoves === redMoves + yellowMoves && startWins === redWins + yellowWins && startPlayerCount === playerCount) {
+            resetGame();
+        }
+    }, 31000)
+}
 
 // conditional statement for when a spectator joins to hide the play buttons, possibly unneccesary
 if (playerCount > 1) {
@@ -732,3 +759,6 @@ if (playerCount > 1) {
 } else {
     $(".playButton").removeClass("hide");
 }
+
+// append the time display
+$("#redTimeDisplay").html("<h2>Time Remaining: " + timeRemaining + " seconds</h2>");
