@@ -10,16 +10,40 @@
     visibility: hidden;
 }
 
+#hero {
+    background-color: #004C7F;
+    margin-bottom: 50px;
+}
+
 .columns {
-    background-color: #6691FF;
+    background-color: #0071BC;
+    border: 2px solid #0071BC;
+    border-radius: 15px;
+}
+
+#red, #yellow {
+    margin-top: 25px;
+}
+#red {
+    background-color: #EF4A4A;
+}
+
+#yellow {
+    background-color: #FCCD4E;
 }
 
 .red {
-    background-color: red;
+    background-color: #EF4A4A;
+}
+
+#gameBoard {
+    color: white;
+    border: 0px solid #0071BC;
+    border-radius: 15px;
 }
 
 .yellow {
-    background-color: yellow;
+    background-color: #FCCD4E;
 }
 #chatbox {
     position: absolute;
@@ -39,4 +63,28 @@
 
 #redAlert, #yellowAlert {
     margin-top: 100px;
+}
+
+.input {
+    margin-bottom: 5px;
+}
+
+#chatButton {
+    background-color: #004C7F;
+    color: white;
+}
+
+#messageWrapper {
+    background-color: #64B8EF;
+    border: 0px solid #64B8EF;
+    border-radius: 15px;
+    margin-bottom: 5px;
+}
+
+#messages p {
+    margin: 0px 0px 5px 5px;
+}
+
+h6 {
+    text-align: center;
 }

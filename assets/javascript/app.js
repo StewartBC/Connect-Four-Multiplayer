@@ -11,6 +11,8 @@ firebase.initializeApp(config);
 
 var database = firebase.database();
 
+
+// main game array
 var gameArray = [
     ["blank", "blank", "blank", "blank", "blank", "blank", "blank"],
     ["blank", "blank", "blank", "blank", "blank", "blank", "blank"],
@@ -20,6 +22,7 @@ var gameArray = [
     ["blank", "blank", "blank", "blank", "blank", "blank", "blank"]
 ];
 
+// array of blanks to help restart the game
 var blankArray = [
     ["blank", "blank", "blank", "blank", "blank", "blank", "blank"],
     ["blank", "blank", "blank", "blank", "blank", "blank", "blank"],
@@ -29,19 +32,24 @@ var blankArray = [
     ["blank", "blank", "blank", "blank", "blank", "blank", "blank"]
 ];
 
+// variable declarations
 var redMoves = 0;
 var yellowMoves = 0;
 var redWins = 0;
 var yellowWins = 0;
 var redCount = 1;
 var yellowCount = 1;
-var userColor;
+var userColor = "";
 var playerCount = 0;
 var timeRemaining = 30;
 var intervalId;
 var totalMoves = 0;
+var filledSpaces = 0;
+var redMessage;
+var yellowMessage;
+var playerCountOnLoad = 0;
 
-
+// set of 8 functions, 4 for each color, used to calculate all possible win conditions
 function calcRedWinVert(row, column) {
     if (row !== 5 && gameArray[row + 1][column] === "red") {
         redCount++;
@@ -67,7 +75,6 @@ function calcRedWinVert(row, column) {
             }
         }
     }
-    alertRedWin();
 }
 
 function calcYellowWinVert(row, column) {
@@ -95,7 +102,6 @@ function calcYellowWinVert(row, column) {
             }
         }
     }
-    alertYellowWin();
 }
 
 function calcRedWinHoriz(row, column) {
@@ -123,7 +129,6 @@ function calcRedWinHoriz(row, column) {
             }
         }
     }
-    alertRedWin();
 }
 
 function calcYellowWinHoriz(row, column) {
@@ -151,7 +156,6 @@ function calcYellowWinHoriz(row, column) {
             }
         }
     }
-    alertYellowWin();
 }
 
 function calcRedWinDiagUp(row, column) {
@@ -179,7 +183,6 @@ function calcRedWinDiagUp(row, column) {
             }
         }
     }
-    alertRedWin();
 }
 
 function calcYellowWinDiagUp(row, column) {
@@ -207,7 +210,6 @@ function calcYellowWinDiagUp(row, column) {
             }
         }
     }
-    alertYellowWin();
 }
 
 function calcRedWinDiagDown(row, column) {
@@ -235,7 +237,6 @@ function calcRedWinDiagDown(row, column) {
             }
         }
     }
-    alertRedWin();
 }
 
 function calcYellowWinDiagDown(row, column) {
@@ -243,7 +244,7 @@ function calcYellowWinDiagDown(row, column) {
         yellowCount++;
         if (row !== 4 && column !== 1 && gameArray[row + 2][column - 2] === "yellow") {
             yellowCount++;
-            if (row !== 3 && colum !== 2 && gameArray[row + 3][column - 3] === "yellow") {
+            if (row !== 3 && column !== 2 && gameArray[row + 3][column - 3] === "yellow") {
                 yellowCount++;
             } else if (row !== 0 && column !== 5 && gameArray[row - 1][column + 1] === "yellow") {
                 yellowCount++;
@@ -263,80 +264,108 @@ function calcYellowWinDiagDown(row, column) {
             }
         }
     }
-    alertYellowWin();
 }
 
+// functions that call the above functions and then check the current count (how many in a row), calls next function if no win is found
 function calcRedWin(row, column) {
     calcRedWinVert(row, column);
-    calcRedWinHoriz(row, column);
-    calcRedWinDiagUp(row, column);
-    calcRedWinDiagDown(row, column);
+    if (redCount > 3) {
+        alertRedWin();
+    } else {
+        calcRedWinHoriz(row, column);
+        if (redCount > 3) {
+            alertRedWin();
+        } else {
+            calcRedWinDiagUp(row, column);
+            if (redCount > 3) {
+                alertRedWin();
+            } else {
+                calcRedWinDiagDown(row, column);
+                if (redCount > 3) {
+                    alertRedWin();
+                } else {
+                    redCount = 1;
+                }
+            }
+        }
+    }
 }
 
 function calcYellowWin(row, column) {
     calcYellowWinVert(row, column);
-    calcYellowWinHoriz(row, column);
-    calcYellowWinDiagUp(row, column);
-    calcYellowWinDiagDown(row, column);
+    if (yellowCount > 3) {
+        alertYellowWin();
+    } else {
+        calcYellowWinHoriz(row, column);
+        if (yellowCount > 3) {
+            alertYellowWin();
+        } else {
+            calcYellowWinDiagUp(row, column);
+            if (yellowCount > 3) {
+                alertYellowWin();
+            } else {
+                calcYellowWinDiagDown(row, column);
+                if (yellowCount > 3) {
+                    alertYellowWin();
+                } else {
+                    yellowCount = 1;
+                }
+            }
+        }
+    }
 }
 
 function calcWin(color, row, column) {
     if (color === "red") {
         calcRedWin(row, column);
-    } else {
+    } else if (color === "yellow") {
         calcYellowWin(row, column);
     }
-    for (p = 0; p < gameArray.length; p++) {
-        var blankSpaces = 0;
-        for (y = 0; y < gameArray[p].length; y++) {
-            if (gameArray[p][y] === "blank") {
-                blankSpaces++;
+    for (i = 0; i < gameArray.length; i++) {
+        for (j = 0; j < gameArray[i].length; j++) {
+            if (gameArray[i][j] === "red" || gameArray[i][j] === "yellow") {
+                filledSpaces++;
             }
         }
-        if (blankSpaces === 0) {
+        if (filledSpaces === 42) {
+            clearInterval(intervalId);
             alert("The match is a tie!");
             setTimeout(function () {
-                console.log("1");
                 resetGame();
             }, 5000);
         }
     }
+    filledSpaces = 0;
 }
 
+// functions that are called when a win occurs
 function alertRedWin() {
-    if (redCount > 3) {
-        $("#redAlert").text("");
-        $("#redAlert").text("Red has won!");
-        redWins++;
-        database.ref("/players").update({
-            playerCount: 0,
-        });
-        clearInterval(intervalId);
-        setTimeout(function () {
-            console.log("2");
-            resetGame();
-        }, 5000);
-    }
-    redCount = 1;
+    database.ref("/redText").update({
+        redText: "Red has won!"
+    })
+    clearInterval(intervalId);
+    database.ref("/wins").update({
+        redWins: redWins + 1
+    })
+    setTimeout(function () {
+        resetGame();
+    }, 5000);
 }
 
 function alertYellowWin() {
-    if (yellowCount > 3) {
-        $("#yellowAlert").text("");
-        $("#yellowAlert").text("Yellow has won!");
-        yellowWins++;
-        clearInterval(intervalId);
-        database.ref("/players").update({
-            playerCount: 0,
-        })
-        setTimeout(function () {
-            console.log("3");
-            resetGame();
-        }, 5000);
-    }
-    yellowCount = 1;
+    database.ref("/yellowText").update({
+        yellowText: "Yellow has won!"
+    })
+    clearInterval(intervalId);
+    database.ref("/wins").update({
+        yellowWins: yellowWins + 1
+    })
+    setTimeout(function () {
+        resetGame();
+    }, 5000);
 }
 
+// function to add color to the circles
 function colorize() {
     for (i = 0; i < gameArray.length; i++) {
         for (j = 0; j < gameArray[i].length; j++) {
@@ -349,6 +378,7 @@ function colorize() {
     }
 }
 
+// function to reset the game
 function resetGame() {
     for (h = 0; h < gameArray.length; h++) {
         for (l = 0; l < gameArray[h].length; l++) {
@@ -364,31 +394,37 @@ function resetGame() {
     redCount = 1;
     yellowCount = 1;
     $(".playButton").removeClass("hide");
-    $("#redAlert").text("");
-    $("#yellowAlert").text("");
+    database.ref("/redText").update({
+        redText: ""
+    })
+    database.ref("/yellowText").update({
+        yellowText: ""
+    })
     database.ref("/array").update({
         gameArray: blankArray
     })
-    database.ref("/wins").update({
-        redWins: redWins
-    });
-    database.ref("/wins").update({
-        yellowWins: yellowWins
-    })
     database.ref("/players").update({
-        playerCount: playerCount
+        playerCount: 0
     })
-    database.ref().update({
-        redMoves: 0,
-        yellowMoves: 0,
+    database.ref("/redMoves").update({
+        redMoves: 0
+    })
+    database.ref("/yellowMoves").update({
+        yellowMoves: 0
+    })
+    database.ref("/redPlayer").update({
         redPlayer: false,
-        yellowPlayer: false
+    });
+    database.ref("/yellowPlayer").update({
+        yellowPlayer: false,
     });
     clearInterval(intervalId);
     timeRemaining = 30;
 }
 
+// function to keep track of the turn timer (30 seconds)
 function decrement() {
+    // there was a bug where the time did not reset after your opponent's move, this somehow worked (see lines 529, 542, 564, 577)
     if (totalMoves !== redMoves + yellowMoves) {
         timeRemaining = 30;
     }
@@ -406,43 +442,57 @@ function decrement() {
     if (timeRemaining === 0) {
         clearInterval(intervalId);
         if (redMoves === yellowMoves) {
-            yellowWins++;
             clearInterval(intervalId);
+            database.ref("/wins").update({
+                yellowWins: yellowWins + 1
+            })
             database.ref("/players").update({
                 playerCount: 0,
             })
-            $("#redAlert").text("Red has lost!");
-            $("#yellowAlert").text("Yellow has won!");
+            database.ref("/redText").update({
+                redText: "Red has lost!"
+            })
+            database.ref("/yellowText").update({
+                yellowText: "Yellow has won!"
+            })
         } else {
-            redWins++;
             clearInterval(intervalId);
+            database.ref("/wins").update({
+                redWins: redWins + 1
+            })
             database.ref("/players").update({
                 playerCount: 0,
             })
-            $("#redAlert").text("Red has won!");
-            $("#yellowAlert").text("Yellow has lost!");
+            database.ref("/redText").update({
+                redText: "Red has won!"
+            })
+            database.ref("/yellowText").update({
+                yellowText: "Yellow has lost!"
+            })
         }
         setTimeout(function () {
-            console.log("4");
             resetGame();
         }, 5000);
     }
 }
 
+// function to clear interval
 function resetInterval() {
     clearInterval(intervalId);
     timeRemaining = 30;
     intervalId = setInterval(decrement, 1000);
 }
 
+
+// click listener for the play buttons
 $(".playButton").on("click", function () {
     userColor = $(this).attr("data-color");
     if (userColor === "red") {
-        database.ref().update({
+        database.ref("/redPlayer").update({
             redPlayer: true
         });
     } else {
-        database.ref().update({
+        database.ref("/yellowPlayer").update({
             yellowPlayer: true
         })
     }
@@ -452,111 +502,132 @@ $(".playButton").on("click", function () {
     $(".playButton").addClass("hide");
 })
 
+
+// click listener for clicking a circle, followed by numerous checks to ensure only correct moves by the correct player can be made
 $(".circle").on("click", function () {
-    $("#redAlert").text("");
-    $("#yellowAlert").text("");
+    if (userColor !== "red" && userColor !== "yellow") {
+        if (playerCount > 1) {
+            alert("You must wait for this game to finish before playing!");
+        } else {
+            alert("You must choose a color before playing!");
+        }
+    }
     var thisRow = parseInt($(this).attr("data-row"));
     var thisColumn = parseInt($(this).attr("data-column"));
     var rowBelow = thisRow - 1;
-    if (playerCount > 1) {
-        if (userColor === "red") {
-            if (redMoves === yellowMoves) {
-                if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
-                    totalMoves = redMoves + yellowMoves;
-                    resetInterval();
-                    gameArray[thisRow][thisColumn] = "red";
-                    $(this).addClass("red");
-                    calcWin(userColor, thisRow, thisColumn);
-                    redMoves++;
-                    database.ref().update({
-                        redMoves: redMoves
-                    })
-                    database.ref("/array").update({
-                        gameArray: gameArray
-                    })
-                } else if (gameArray[rowBelow][thisColumn] !== "blank" && gameArray[thisRow][thisColumn] === "blank") {
-                    totalMoves = redMoves + yellowMoves;
-                    resetInterval();
-                    gameArray[thisRow][thisColumn] = "red";
-                    $(this).addClass("red");
-                    calcWin(userColor, thisRow, thisColumn);
-                    redMoves++;
-                    database.ref().update({
-                        redMoves: redMoves
-                    })
-                    database.ref("/array").update({
-                        gameArray: gameArray
-                    })
-                } else {
-                    $("#redAlert").text("");
-                    $("#redAlert").text("You can't move there!");
+    if (userColor === "red" || userColor === "yellow") {
+        database.ref("/redText").update({
+            redText: ""
+        })
+        database.ref("/yellowText").update({
+            yellowText: ""
+        })
+        if (playerCount > 1) {
+            if (userColor === "red") {
+                if (redMoves === yellowMoves) {
+                    if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
+                        totalMoves = redMoves + yellowMoves;
+                        resetInterval();
+                        gameArray[thisRow][thisColumn] = "red";
+                        $(this).addClass("red");
+                        calcWin(userColor, thisRow, thisColumn);
+                        redMoves++;
+                        database.ref("/redMoves").update({
+                            redMoves: redMoves
+                        })
+                        database.ref("/array").update({
+                            gameArray: gameArray
+                        })
+                    } else if (gameArray[rowBelow][thisColumn] !== "blank" && gameArray[thisRow][thisColumn] === "blank") {
+                        totalMoves = redMoves + yellowMoves;
+                        resetInterval();
+                        gameArray[thisRow][thisColumn] = "red";
+                        $(this).addClass("red");
+                        calcWin(userColor, thisRow, thisColumn);
+                        redMoves++;
+                        database.ref("/redMoves").update({
+                            redMoves: redMoves
+                        })
+                        database.ref("/array").update({
+                            gameArray: gameArray
+                        })
+                    } else {
+                        datebase.ref("/redText").update({
+                            redText: "You can't move there!"
+                        })
+                    }
                 }
-            } else {
-                $("#redAlert").text("");
-                $("#redAlert").text("It's not your turn!")
             }
-        }
-        if (userColor === "yellow") {
-            if (redMoves === yellowMoves + 1) {
-                if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
-                    totalMoves = redMoves + yellowMoves;
-                    resetInterval();
-                    gameArray[thisRow][thisColumn] = "yellow";
-                    $(this).addClass("yellow");
-                    calcWin(userColor, thisRow, thisColumn);
-                    yellowMoves++;
-                    database.ref().update({
-                        yellowMoves: yellowMoves
-                    })
-                    database.ref("/array").update({
-                        gameArray: gameArray
-                    })
-                } else if (gameArray[rowBelow][thisColumn] !== "blank" && gameArray[thisRow][thisColumn] === "blank") {
-                    totalMoves = redMoves + yellowMoves;
-                    resetInterval();
-                    gameArray[thisRow][thisColumn] = "yellow";
-                    $(this).addClass("yellow");
-                    calcWin(userColor, thisRow, thisColumn);
-                    yellowMoves++;
-                    database.ref().update({
-                        yellowMoves: yellowMoves
-                    })
-                    database.ref("/array").update({
-                        gameArray: gameArray
-                    })
-                } else {
-                    $("#yellowAlert").text("");
-                    $("#yellowAlert").text("You can't move there!");
+            if (userColor === "yellow") {
+                if (redMoves === yellowMoves + 1) {
+                    if (thisRow === 0 && gameArray[thisRow][thisColumn] === "blank") {
+                        totalMoves = redMoves + yellowMoves;
+                        resetInterval();
+                        gameArray[thisRow][thisColumn] = "yellow";
+                        $(this).addClass("yellow");
+                        calcWin(userColor, thisRow, thisColumn);
+                        yellowMoves++;
+                        database.ref("/yellowMoves").update({
+                            yellowMoves: yellowMoves
+                        })
+                        database.ref("/array").update({
+                            gameArray: gameArray
+                        })
+                    } else if (gameArray[rowBelow][thisColumn] !== "blank" && gameArray[thisRow][thisColumn] === "blank") {
+                        totalMoves = redMoves + yellowMoves;
+                        resetInterval();
+                        gameArray[thisRow][thisColumn] = "yellow";
+                        $(this).addClass("yellow");
+                        calcWin(userColor, thisRow, thisColumn);
+                        yellowMoves++;
+                        database.ref("/yellowMoves").update({
+                            yellowMoves: yellowMoves
+                        })
+                        database.ref("/array").update({
+                            gameArray: gameArray
+                        })
+                    } else {
+                        database.ref("/yellowText").update({
+                            yellowText: "You can't move there!"
+                        })
+                    }
                 }
-            } else {
-                $("#yellowAlert").text("");
-                $("#yellowAlert").text("It's not your turn!!")
             }
-        }
-    } else {
-        if (userColor !== "red" && userColor !== "yellow") {
-            if (playerCount > 1) {
-                alert("You must wait for this game to finish before playing!");
-            } else {
-                alert("You must choose a color before playing!");
-            }
-        }
-        if (userColor === "red") {
-            $("#redAlert").text("You have no opponent!");
-        } else if (userColor === "yellow") {
-            $("#yellowAlert").text("You have no opponent");
+        } else {
+            alert("You have no opponent!")
         }
     }
+
 });
 
-$("#reset").on("click", function () {
-    clearInterval(intervalId);
-    console.log("5");
-    resetGame();
+// chat button click listener
+$("#chatButton").on("click", function () {
+    var message = $("#chatInput").val();
+    if (userColor === "red") {
+        database.ref("/chat").push({
+            message: "Red Player: " + message
+        });
+    } else if (userColor === "yellow") {
+        database.ref("/chat").push({
+            message: "Yellow Player: " + message
+        });
+    } else {
+        database.ref("/chat").push({
+            message: "Spectator: " + message
+        });
+    }
+    $("#chatInput").val("");
 });
 
+// firebase value listeners
 database.ref("/players").on("value", function (snapshot) {
-    console.log("players");
+    for (h = 0; h < gameArray.length; h++) {
+        for (l = 0; l < gameArray[h].length; l++) {
+            gameArray[h][l] = "blank";
+            $(".circle").removeClass("red");
+            $(".circle").removeClass("yellow");
+        }
+    }
     if (snapshot.child("playerCount").exists()) {
         playerCount = snapshot.val().playerCount;
         if (playerCount === 2) {
@@ -565,95 +636,99 @@ database.ref("/players").on("value", function (snapshot) {
     }
 });
 
-database.ref().on("value", function (snapshot) {
-    console.log("value");
-    $("#redAlert").text("");
-    $("#yellowAlert").text("");
+database.ref("/redMoves").on("value", function (snapshot) {
+    redMoves = snapshot.val().redMoves;
+    redMovesOnLoad = snapshot.val().redMoves;
+})
+
+database.ref("/yellowMoves").on("value", function (snapshot) {
+    yellowMoves = snapshot.val().yellowMoves;
+    yellowMovesOnLoad = snapshot.val().yellowMoves;
+})
+
+database.ref("/redPlayer").on("value", function (snapshot) {
     if (snapshot.val().redPlayer === true) {
         $("#red").addClass("hide");
     } else if (snapshot.val().redPlayer === false && userColor === "") {
         $("#red").removeClass("hide");
     }
+})
+
+database.ref("/yellowPlayer").on("value", function (snapshot) {
     if (snapshot.val().yellowPlayer === true) {
         $("#yellow").addClass("hide");
     } else if (snapshot.val().yellowPlayer === false && userColor === "") {
         $("#yellow").removeClass("hide");
     }
-    redMoves = snapshot.val().redMoves;
-    yellowMoves = snapshot.val().yellowMoves;
+})
+
+database.ref("/redText").on("value", function (snapshot) {
+    redMessage = snapshot.val().redText;
+    $("#redAlert").html(redMessage)
+});
+
+database.ref("/yellowText").on("value", function (snapshot) {
+    yellowMessage = snapshot.val().yellowText;
+    $("#yellowAlert").html(yellowMessage)
 });
 
 database.ref("/wins").on("value", function (snapshot) {
-    console.log("wins");
+        if (userColor === "") {
+            for (h = 0; h < gameArray.length; h++) {
+                for (l = 0; l < gameArray[h].length; l++) {
+                    gameArray[h][l] = "blank";
+                    $(".circle").removeClass("red");
+                    $(".circle").removeClass("yellow");
+                }
+            }
+            clearInterval(intervalId);
+            timeRemaining = 30;
+        }
+
     redWins = snapshot.val().redWins;
     yellowWins = snapshot.val().yellowWins;
-    $("#redWins").text("Red Wins: " + snapshot.val().redWins);
-    $("#yellowWins").text("Yellow Wins: " + snapshot.val().yellowWins);
-//     if (userColor === "red" || userColor === "yellow") {
-//     setTimeout(function () {
-//         resetGame();
-//     }, 5000);
-// }
+    $("#redWins").html("<h6>Red Wins:<br>" + snapshot.val().redWins + "</h6>");
+    $("#yellowWins").html("<h6>Yellow Wins:<br>" + snapshot.val().yellowWins + "</h6>");
+    setTimeout(function () {
+        database.ref("/redText").update({
+            redText: ""
+        })
+        database.ref("/yellowText").update({
+            yellowText: ""
+        })
+
+    }, 5000)
+    clearInterval(intervalId);
+    if (userColor === "red" || userColor === "yellow") {
+        setTimeout(function () {
+            resetGame();
+        }, 5000);
+    }
 })
 
 database.ref("/array").on("value", function (snapshot) {
-    if (snapshot.child("gameArray").exists()) {
-        console.log("array");
-        gameArray = snapshot.val().gameArray;
-        colorize();
-    }
-})
-
-database.ref().once("value", function (snapshot) {
-    console.log("once");
-    gameArray = snapshot.val().array.gameArray;
-    playerCount = snapshot.val().players.playerCount;
-    redMoves = snapshot.val().redMoves;
-    yellowMoves = snapshot.val().yellowMoves;
+    gameArray = snapshot.val().gameArray;
     colorize();
-    redWins = snapshot.val().wins.redWins;
-    yellowWins = snapshot.val().wins.yellowWins;
-    $("#redWins").text("Red Wins: " + snapshot.val().wins.redWins);
-    $("#yellowWins").text("Yellow Wins: " + snapshot.val().wins.yellowWins);
-    if (snapshot.val().redPlayer === true) {
-        $("#red").addClass("hide");
-    } else if (snapshot.val().redPlayer === false && userColor === "") {
-        $("#red").removeClass("hide");
-    }
-    if (snapshot.val().yellowPlayer === true) {
-        $("#yellow").addClass("hide");
-    } else if (snapshot.val().yellowPlayer === false && userColor === "") {
-        $("#yellow").removeClass("hide");
-    }
 })
 
-if (playerCount > 1) {
-    $(".playButton").addClass("hide");
-} else {
-    $(".playButton").removeClass("hide");
-}
-
-$("#chatButton").on("click", function() {
-    var message = $("#chatInput").val();
-    if (userColor === "red") {
-    database.ref("/chat").push({
-        message: "Red Player: " + message
-    });
-} else if (userColor === "yellow") {
-    database.ref("/chat").push({
-        message: "Yellow Player: " + message
-    });
-} else {
-    database.ref("/chat").push({
-        message: "Spectator: " + message
-    });
-}
-    $("#chatInput").val("");
-});
-
-database.ref("/chat").on("child_added", function(childSnapshot) {
+database.ref("/chat").on("child_added", function (childSnapshot) {
     var message = childSnapshot.val().message
     $("#messages").append("<p>" + message + "</p>");
     var elem = document.getElementById('messages');
     elem.scrollTop = elem.scrollHeight;
 });
+
+
+// resets the game after 31 seconds if a spectator joins during a game in which both players left
+setTimeout(function() {
+    if (playerCount > 1 && redMovesOnLoad === redMoves && yellowMovesOnLoad === yellowMoves) {
+        resetGame();
+    }
+}, 31000)
+
+// conditional statement for when a spectator joins to hide the play buttons, possibly unneccesary
+if (playerCount > 1) {
+    $(".playButton").addClass("hide");
+} else {
+    $(".playButton").removeClass("hide");
+}

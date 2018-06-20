@@ -12,6 +12,18 @@
 </head>
 
 <body>
+  <section class="hero is-info is-large" id="hero">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">
+          Connect Four
+        </h1>
+        <h2 class="subtitle">
+          Multiplayer
+        </h2>
+      </div>
+    </div>
+  </section>
   <div class="container" id="game">
     <div id="gameBoard" class="container">
       <div class="columns is-gapless">
@@ -19,8 +31,7 @@
           <div class="columns is-gapless">
             <div class="column is-one-fourth"></div>
             <div class="column is-one-half">
-              <a id="red" class="button playButton" data-color="red">Play as Red</a>
-              <a class="button" id="reset">Reset</a>
+              <a id="red" class="button is-primary playButton" data-color="red">Play as Red</a>
               <div class="columns">
                 <div class="column" id="redAlert">
                 </div>
@@ -97,7 +108,7 @@
           <div class="columns is-gapless">
             <div class="column is-one-fourth"></div>
             <div class="column is-one-half">
-              <a id="yellow" class="button playButton" data-color="yellow">Play as Yellow</a>
+              <a id="yellow" class="button is-primary playButton" data-color="yellow">Play as Yellow</a>
               <div class="columns is-gapless">
                 <div class="column" id="yellowStats">
                 </div>
@@ -120,14 +131,16 @@
         </div>
       </div>
       <div class="column">
-      <div id="messages" style="overflow-y: scroll; height:200px;">
-</div>
-          <div class="control">
-              <input class="input" id="chatInput" type="text" placeholder="Chat with your opponent!">
-              <a class="button" id="chatButton">Chat</a>
-            </div>
-        
+        <div id="messageWrapper">
+        <div id="messages" style="overflow-y: scroll; height:200px;">
+          </div>
         </div>
+        <div class="control">
+          <input class="input" id="chatInput" type="text" placeholder="Chat with your opponent!">
+          <a class="button" id="chatButton">Chat</a>
+        </div>
+
+      </div>
     </div>
   </div>
 
