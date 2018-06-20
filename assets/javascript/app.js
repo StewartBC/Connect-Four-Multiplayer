@@ -299,11 +299,11 @@ function calcRedWin(row, column) {
 function calcYellowWin(row, column) {
     if (calcYellowWinVert(row, column) > 3) {
         alertYellowWin();
-    } else if (calcRedWinHoriz(row, column) > 3) {
+    } else if (calcYellowWinHoriz(row, column) > 3) {
         alertYellowWin();
-    } else if (calcRedWinDiagUp(row, column) > 3) {
+    } else if (calcYellowWinDiagUp(row, column) > 3) {
         alertYellowWin();
-    } else if (calcRedWinDiagDown(row, column) > 3) {
+    } else if (calcYellowWinDiagDown(row, column) > 3) {
         alertYellowWin();
     }
 }
@@ -389,7 +389,6 @@ function resetGame() {
     userColor = "";
     redCount = 1;
     yellowCount = 1;
-    $(".playButton").removeClass("hide");
     database.ref("/redText").update({
         redText: ""
     })
@@ -414,6 +413,7 @@ function resetGame() {
     database.ref("/yellowPlayer").update({
         yellowPlayer: false,
     });
+    $(".playButton").removeClass("hide");
     clearInterval(intervalId);
     timeRemaining = 30;
 }
