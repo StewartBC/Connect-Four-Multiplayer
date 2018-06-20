@@ -238,7 +238,7 @@ function calcRedWinDiagDown(row, column) {
             }
         } else if (row !== 0 && column !== 5 && gameArray[row - 1][column + 1] === "red") {
             redCount++;
-            if (gameArray[row - 2][column + 2] === "red") {
+            if (row !== 1 && column !== 4 && gameArray[row - 2][column + 2] === "red") {
                 redCount++;
             }
         }
@@ -321,6 +321,7 @@ function calcWin(color, row, column) {
             }
         }
         if (filledSpaces === 42) {
+            console.log("tie");
             clearInterval(intervalId);
             alert("The match is a tie!");
             setTimeout(function () {
@@ -333,6 +334,7 @@ function calcWin(color, row, column) {
 
 // functions that are called when a win occurs
 function alertRedWin() {
+    console.log("red win");
     database.ref("/redText").update({
         redText: "Red has won!"
     })
@@ -346,6 +348,7 @@ function alertRedWin() {
 }
 
 function alertYellowWin() {
+    console.log("yellow win");
     database.ref("/yellowText").update({
         yellowText: "Yellow has won!"
     })
@@ -463,9 +466,6 @@ function decrement() {
                 yellowText: "Yellow has lost!"
             })
         }
-        setTimeout(function () {
-            resetGame();
-        }, 5000);
     }
 }
 
