@@ -48,9 +48,11 @@ var filledSpaces = 0;
 var redMessage;
 var yellowMessage;
 var playerCountOnLoad = 0;
+var allowMoves = false;
 
 // set of 8 functions, 4 for each color, used to calculate all possible win conditions
 function calcRedWinVert(row, column) {
+    redCount = 1;
     if (row !== 5 && gameArray[row + 1][column] === "red") {
         redCount++;
         if (row !== 4 && gameArray[row + 2][column] === "red") {
@@ -75,9 +77,11 @@ function calcRedWinVert(row, column) {
             }
         }
     }
+    return redCount;
 }
 
 function calcYellowWinVert(row, column) {
+    yellowCount = 1;
     if (row !== 5 && gameArray[row + 1][column] === "yellow") {
         yellowCount++;
         if (row !== 4 && gameArray[row + 2][column] === "yellow") {
@@ -102,9 +106,11 @@ function calcYellowWinVert(row, column) {
             }
         }
     }
+    return yellowCount;
 }
 
 function calcRedWinHoriz(row, column) {
+    redCount = 1;
     if (column !== 5 && gameArray[row][column + 1] === "red") {
         redCount++;
         if (column !== 4 && gameArray[row][column + 2] === "red") {
@@ -129,9 +135,11 @@ function calcRedWinHoriz(row, column) {
             }
         }
     }
+    return redCount;
 }
 
 function calcYellowWinHoriz(row, column) {
+    yellowCount = 1;
     if (column !== 5 && gameArray[row][column + 1] === "yellow") {
         yellowCount++;
         if (column !== 4 && gameArray[row][column + 2] === "yellow") {
@@ -156,9 +164,11 @@ function calcYellowWinHoriz(row, column) {
             }
         }
     }
+    return yellowCount;
 }
 
 function calcRedWinDiagUp(row, column) {
+    redCount = 1;
     if (row !== 5 && column !== 5 && gameArray[row + 1][column + 1] === "red") {
         redCount++;
         if (row !== 4 && column !== 4 && gameArray[row + 2][column + 2] === "red") {
@@ -183,9 +193,11 @@ function calcRedWinDiagUp(row, column) {
             }
         }
     }
+    return redCount;
 }
 
 function calcYellowWinDiagUp(row, column) {
+    yellowCount = 1;
     if (row !== 5 && column !== 5 && gameArray[row + 1][column + 1] === "yellow") {
         yellowCount++;
         if (row !== 4 && row !== 4 && gameArray[row + 2][column + 2] === "yellow") {
@@ -210,9 +222,11 @@ function calcYellowWinDiagUp(row, column) {
             }
         }
     }
+    return yellowCount;
 }
 
 function calcRedWinDiagDown(row, column) {
+    redCount = 1;
     if (row !== 5 && column !== 0 && gameArray[row + 1][column - 1] === "red") {
         redCount++;
         if (row !== 4 && column !== 1 && gameArray[row + 2][column - 2] === "red") {
@@ -237,9 +251,11 @@ function calcRedWinDiagDown(row, column) {
             }
         }
     }
+    return redCount;
 }
 
 function calcYellowWinDiagDown(row, column) {
+    yellowCount = 1;
     if (row !== 5 && column !== 0 && gameArray[row + 1][column - 1] === "yellow") {
         yellowCount++;
         if (row !== 4 && column !== 1 && gameArray[row + 2][column - 2] === "yellow") {
@@ -264,54 +280,31 @@ function calcYellowWinDiagDown(row, column) {
             }
         }
     }
+    return yellowCount;
 }
 
 // functions that call the above functions and then check the current count (how many in a row), calls next function if no win is found
 function calcRedWin(row, column) {
-    calcRedWinVert(row, column);
-    if (redCount > 3) {
+    if (calcRedWinVert(row, column) > 3) {
         alertRedWin();
-    } else {
-        calcRedWinHoriz(row, column);
-        if (redCount > 3) {
-            alertRedWin();
-        } else {
-            calcRedWinDiagUp(row, column);
-            if (redCount > 3) {
-                alertRedWin();
-            } else {
-                calcRedWinDiagDown(row, column);
-                if (redCount > 3) {
-                    alertRedWin();
-                } else {
-                    redCount = 1;
-                }
-            }
-        }
+    } else if (calcRedWinHoriz(row, column) > 3) {
+        alertRedWin();
+    } else if (calcRedWinDiagUp(row, column) > 3) {
+        alertRedWin();
+    } else if (calcRedWinDiagDown(row, column) > 3) {
+        alertRedWin();
     }
 }
 
 function calcYellowWin(row, column) {
-    calcYellowWinVert(row, column);
-    if (yellowCount > 3) {
+    if (calcYellowWinVert(row, column) > 3) {
         alertYellowWin();
-    } else {
-        calcYellowWinHoriz(row, column);
-        if (yellowCount > 3) {
-            alertYellowWin();
-        } else {
-            calcYellowWinDiagUp(row, column);
-            if (yellowCount > 3) {
-                alertYellowWin();
-            } else {
-                calcYellowWinDiagDown(row, column);
-                if (yellowCount > 3) {
-                    alertYellowWin();
-                } else {
-                    yellowCount = 1;
-                }
-            }
-        }
+    } else if (calcRedWinHoriz(row, column) > 3) {
+        alertYellowWin();
+    } else if (calcRedWinDiagUp(row, column) > 3) {
+        alertYellowWin();
+    } else if (calcRedWinDiagDown(row, column) > 3) {
+        alertYellowWin();
     }
 }
 
@@ -486,6 +479,7 @@ function resetInterval() {
 
 // click listener for the play buttons
 $(".playButton").on("click", function () {
+    allowMoves = true;
     userColor = $(this).attr("data-color");
     if (userColor === "red") {
         database.ref("/redPlayer").update({
@@ -525,7 +519,7 @@ $(".circle").on("click", function () {
         })
         if (playerCount > 1) {
             if (userColor === "red") {
-                if (redMoves === yellowMoves) {
+                if (redMoves === yellowMoves && allowMoves === true) {
                     if (gameArray[thisRow][thisColumn] === "red" || gameArray[thisRow][thisColumn] === "yellow") {
                         console.log("u cant");
                         database.ref("/redText").update({
@@ -569,7 +563,7 @@ $(".circle").on("click", function () {
                 }
             }
             if (userColor === "yellow") {
-                if (redMoves === yellowMoves + 1) {
+                if (redMoves === yellowMoves + 1 && allowMoves === true) {
                     if (gameArray[thisRow][thisColumn] === "red" || gameArray[thisRow][thisColumn] === "yellow") {
                         database.ref("/yellowText").update({
                             yellowText: "You can't move there!"
@@ -692,6 +686,7 @@ database.ref("/yellowText").on("value", function (snapshot) {
 
 
 database.ref("/wins").on("value", function (snapshot) {
+    allowMoves = false;
     $("#redTimeDisplay").addClass("hide");
     $("#yellowTimeDisplay").addClass("hide");
     if (userColor === "") {
