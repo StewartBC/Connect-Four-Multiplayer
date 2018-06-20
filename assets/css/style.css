@@ -25,14 +25,18 @@
     position: absolute;
 }
 
-input {
-    width: 
+#redWins, #yellowWins {
+    margin-top: 0px;
 }
 
 #chatColumn {
     background-color: lightgray;
 }
 
-/* #redAlert, #yellowAlert {
-    margin-top: 150px;
-} */
+#redTimeDisplay, #yellowTimeDisplay {
+    margin-top: 140px;
+}
+
+#redAlert, #yellowAlert {
+    margin-top: 100px;
+}
