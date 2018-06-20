@@ -1,4 +1,4 @@
-# RPS-Multiplayer
+# Connect-Four-Multiplayer
 
 
 two arrays, one for each player
